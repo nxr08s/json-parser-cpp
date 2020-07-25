@@ -14,24 +14,37 @@ Main reasons to create this parser is:
 Parser parse each char one by one, and because of the type of input data (chars), its hard (and, probably, inefficient) to change states by simply get new state from matrix by index. Whole state machine based on many (realy many) switch-case statements.
 This state machine have state stack to remember states (e.g. string in object, and this object in array - we need to remebet that we in array and etc.)
 
-Here is transition table:
+#### Here is transition table:
 
-| State                 |      { 	 |     } 	|      [  	 |    ]    |   ,  |   :  |      " 	  | letter | number + - . | ws char |       \ 	  |      t 		|      f 	  |      n 		|
-| :-------------------- | :--------: | :------: | :--------: | :-----: | :--: | :--: | :--------: | :--:   | :----------: | :-----: | :---------: | :---------: | :---------: | :---------: |
-| **Initial state**     | 3 #push(2) | #2 		| 4 #push(2) | #2 	   | #2   | #2 	 | #2 		  | #2 	   | #2 		  | 		| #2 		  | #2 			| #2 		  | #2 			|
-| **in Object**			| #3         | #ret 	| #3 		 | #3      | 	  | #3 	 | 5 #push(3) | #3 	   | #3 		  | 		| #3 		  | #3 			| #3 		  | #3 			|
-| **in Array**          | 3 #push(4) | #4 		| 4 #push(4) | #ret    | 	  | #4 	 | 9 #push(4) | #4 	   | 9 #push(4)   | 		| #4 		  | 12 #push(4) | 13 #push(4) | 14 #push(4) |
-| **in Name**           | 5          | 5 		| 5 		 | 5 	   | 5    | 5 	 | 6 		  | 5 	   | 5 			  | 5 		| 11 #push(5) | 5 			| 5 		  | 5 			|
-| **in After name**     | #6 		 | #6 		| #6 		 | #6 	   | #6   | 7 	 | #6 		  | #6 	   | #6 	 	  | 		| #6 		  | #6 			| #6 		  | #6 			|
-| **in Before value**   | 3 		 | #7 		| 4 		 | #7 	   | #7   | #7 	 | 9 	      | #7 	   | 8 			  | 		| #7 		  | 12 			| 13 		  | 14 			|
-| **in Number**         | #8 		 |	#ret x2 | #8 		 | #ret x2 | #ret | #8 	 | #8 		  | #8 	   | 8 			  | 10 		| #8 		  | #8 			| #8 		  | #8 			|
-| **in String**         | 9 		 | 9 		| 9 		 | 9 	   | 9 	  | 9 	 | 10 	 	  | 9 	   | 9 			  | 9 		| 11 #push(9) | 9 		    | 9 		  | 9 			|
-| **in After Value**    | #10		 | #ret x2	| #10		 | #ret x2 | #ret | #10	 | #10		  | #10	   | #10		  |			| #10		  | #10			| #10		  | #10 		|
-| **in Char escape**    | #ret		 | #ret		| #ret		 | #ret	   | #ret | #ret | #ret		  | #ret   | #ret		  | #ret	| #ret		  | #ret		| #ret		  | #ret 		|
-| **in True**           | #12		 | #12		| #12		 | #12	   | #12  | #12	 | #12		  | #12	   | #12		  | 		| #12		  | #12		    | #12		  | #12 		|
-| **in False**          | #13		 | #13		| #13		 | #13	   | #13  | #13	 | #13 		  | #13	   | #13		  | 		| #13		  | #13		    | #13		  | #13 		|
-| **in Null**           | #13		 | #13 		| #13		 | #13	   | #13  | #13	 | #13 	 	  | #13	   | #13		  | 		| #13		  | #13		    | #13		  | #13 		|
+| id | State             |      {     |   }   |      [    |    ]   |   ,  |   :  |      " 	 | letter | num `+-.` | ws char |       \ 	 |      t  	  |       f    |      n 	|
+| :- | :---------------- | :--------: | :---: | :-------: | :----: | :--: | :--: | :-------: | :--:   | :-------: | :-----: | :--------: | :--------: | :--------: | :--------: |
+|  2 | **Initial**		 | 3#push(2) | #2 	  | 4#push(2) | #2 	   | #2   | #2 	 | #2 		 | #2 	  | #2 		  | 		| #2 		 | #2 		  | #2 		   | #2 		|
+|  3 | **Object**		 | #3        | #ret	  | #3 		  | #3     | 	  | #3 	 | 5#push(3) | #3 	  | #3 		  | 		| #3 		 | #3 		  | #3 		   | #3 		|
+|  4 | **Array**         | 3#push(4) | #4 	  | 4#push(4) | #ret   | 	  | #4 	 | 9#push(4) | #4 	  | 9#push(4) | 		| #4 		 | 12#push(4) | 13#push(4) | 14#push(4) |
+|  5 | **Name**          | 5         | 5 	  | 5 		  | 5 	   | 5    | 5 	 | 6 		 | 5 	  | 5		  | 5 		| 11#push(5) | 5 		  | 5 		   | 5 			|
+|  6 | **After name**    | #6 		 | #6 	  | #6 		  | #6 	   | #6   | 7 	 | #6 		 | #6 	  | #6 	 	  | 		| #6 		 | #6 		  | #6 		   | #6 		|
+|  7 | **Before value**  | 3 		 | #7 	  | 4 		  | #7 	   | #7   | #7 	 | 9 	     | #7 	  | 8 		  | 		| #7 		 | 12 		  | 13 		   | 14 		|
+|  8 | **Number**        | #8 		 | 2x#ret | #8 		  | 2x#ret | #ret | #8 	 | #8 		 | #8 	  | 8 		  | 10 		| #8 		 | #8 		  | #8 		   | #8 		|
+|  9 | **String**        | 9 		 | 9 	  | 9 		  | 9 	   | 9 	  | 9 	 | 10 	 	 | 9 	  | 9 		  | 9 		| 11#push(9) | 9 		  | 9 		   | 9 			|
+| 10 | **After Value**   | #10		 | 2x#ret | #10		  | 2x#ret | #ret | #10	 | #10		 | #10	  | #10		  |			| #10		 | #10		  | #10		   | #10 		|
+| 11 | **Char escape**   | #ret		 | #ret	  | #ret      | #ret   | #ret | #ret | #ret		 | #ret   | #ret	  | #ret	| #ret		 | #ret		  | #ret	   | #ret 		|
+| 12 | **True**          | #12		 | #12	  | #12		  | #12	   | #12  | #12	 | #12		 | #12	  | #12		  | 		| #12		 | #12		  | #12		   | #12 		|
+| 13 | **False**         | #13		 | #13	  | #13		  | #13	   | #13  | #13	 | #13 		 | #13	  | #13		  | 		| #13		 | #13		  | #13		   | #13 		|
+| 14 | **Null**          | #13		 | #13 	  | #13		  | #13	   | #13  | #13	 | #13 	 	 | #13	  | #13		  | 		| #13		 | #13		  | #13		   | #13 		|
 
+#### And errors:
+
+| Code | 			Error message 		  |
+| :--- | :------------------------------- |
+|  #2  | Array or object expected 		  |
+|  #3  | Value's name expected 	  		  |
+|  #4  | Value expected 		  		  |
+|  #6  | `:` expected 			  		  |
+|  #8  | Number, `}`, `]` or `,` expected |
+| #12  | `True` expected  				  |
+| #13  | `False` expected 				  |
+| #14  | `Null` expected  				  |
 
 ### Todo:
 - [ ] Make valid only letters in name
+- [ ] Somehow make autotype to data (RTTI?)
