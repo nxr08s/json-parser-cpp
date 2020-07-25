@@ -86,6 +86,7 @@ static const char exampleJson[] = R"({"web-app": {
     "cofaxTools": "/tools/*"},
  
   "taglib": {
+	"итем": "проверка русского языка"
     "taglib-uri": "cofax.tld",
     "taglib-location": "/WEB-INF/tlds/cofax.tld"}}})";
 
@@ -93,7 +94,7 @@ static const char exampleJson[] = R"({"web-app": {
 void printDataTree(const DataTree* node, const int level = 0);
 
 int main() {
-	setlocale(LC_ALL, "");
+	setlocale(LC_ALL, "ru_ru.utf8");
 
 	Parser parser(exampleJson);
 	parser.parse();
