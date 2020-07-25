@@ -112,13 +112,13 @@ int main() {
 
 void printDataTree(const DataTree * node, const int level) {
 	OFFSET(level);
-	std::cout << "Èìÿ: " << node->getName() << std::endl;
+	std::cout << "Ð˜Ð¼Ñ: " << node->getName() << std::endl;
 
 	OFFSET(level);
-	std::cout << "Òèï: " << DataTree::dataTypeStrings[(unsigned int)node->getType()] << std::endl;
+	std::cout << "Ð¢Ð¸Ð¿: " << DataTree::dataTypeStrings[(unsigned int)node->getType()] << std::endl;
 
 	OFFSET(level);
-	std::cout << "Äàííûå: " << node->getData() << std::endl;
+	std::cout << "Ð”Ð°Ð½Ð½Ñ‹Ðµ: " << node->getData() << std::endl;
 
 	for (auto dt = node->getChildren()->begin(); dt != node->getChildren()->end(); dt++) {
 		printDataTree(*dt, level + 1);
